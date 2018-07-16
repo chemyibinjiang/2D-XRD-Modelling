@@ -222,6 +222,7 @@ for(t=1:theta_num_1)
     theta=[theta theta_1];
 end
 theta=sort([theta theta_extra]);
+theta=unique(theta);
 theta_num=length(theta);
 front_constant=4*pi*1i/lambda;
 flag=zeros(theta_num,1);
@@ -273,7 +274,6 @@ end
 close(h);
 
 %read in the coordination and calculate the disperison factors
-t=2*theta.*360./(2.*pi);
 para_1 =xlsread('Atomic scattering factor for X-ray.xlsx');
 para=[zeros(size(para_1,1),1) para_1 ];
 locat=unique(Coord(:,1));
@@ -343,20 +343,30 @@ end
 close(h);
 %plot the simulation result
 t=2*theta.*360./(2.*pi);
-[fitresult, gof] = createFit(theta',f);
-t_1=linspace(min(theta)+0.001,max(theta)-0.001,10000);
-f_1=feval(fitresult,t_1);
-t_1=2*t_1.*360./(2.*pi);
-[t_e,loc_e]=sort([t t_1]);
-f_e=[f;f_1];
-f_e=f_e(loc_e);
-plot(t_e,f_e);
-t=t';
-title(strcat('Simulated PXRD pattern for   ',samplename));
-xlabel('2-theta');
-ylabel('Intensity');
-twotheta=t_e;
-intensity=f_e;
-save(samplename,'twotheta','intensity');
+if length(theta) == length(unique(theta)) && length(t) == length(unique(t))
+    [fitresult, gof] = createFit(t',f);
+    t_1=linspace(min(t)+0.001,max(t)-0.001,10000);
+    f_1=feval(fitresult,t_1);
+    [t_e,loc_e]=sort([t t_1]);
+    f_e=[f;f_1];
+    f_e=f_e(loc_e);
+    plot(t_e,f_e);
+    t=t';
+    title(strcat('Simulated PXRD pattern for   ',samplename));
+    xlabel('2-theta');
+    ylabel('Intensity');
+    twotheta=t_e;
+    intensity=f_e;
+    save(samplename,'twotheta','intensity');
+else
+    plot(t,f);
+    t=t';
+    title(strcat('Simulated PXRD pattern for   ',samplename));
+    xlabel('2-theta');
+    ylabel('Intensity');
+    twotheta=t;
+    intensity=f;
+    save(samplename,'twotheta','intensity');
+end
 
 % matlabpool close;
